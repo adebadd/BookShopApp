@@ -12,5 +12,6 @@ public interface UserService {
     void deleteUser(Long id);
     Optional<User> authenticate(String email, String password);
     boolean register(User user, String password);
-    User updateUser(User user, long id);
+    User updateUser(User user, Long userId);
+    boolean existsByEmailAndNotId(String email, Long userId);
 }

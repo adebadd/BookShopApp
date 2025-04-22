@@ -6,6 +6,8 @@ import com.example.bookshopapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,11 +16,13 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
     @Override
@@ -39,7 +43,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User saveUser(User user) {
         if (user.getId() == null && user.getPassword() != null) {
-            user.setPassword(encoder.encode(user.getPassword()));
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         return userRepository.save(user);
     }
@@ -51,13 +55,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> authenticate(String email, String password) {
-        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (email == null || password == null) {
+            return Optional.empty();
+        }
+
+        String trimmedEmail = email.trim();
+        Optional<User> userOptional = userRepository.findByEmail(trimmedEmail);
+
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            if (encoder.matches(password, user.getPassword())) {
+            if (passwordEncoder.matches(password, user.getPassword())) {
                 return Optional.of(user);
             }
         }
+
         return Optional.empty();
     }
 
@@ -66,35 +77,30 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(user.getEmail())) {
             return false;
         }
-        user.setPassword(encoder.encode(password));
+        user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
         return true;
     }
 
     @Override
-    public User updateUser(User updatedUser, long id) {
-        Optional<User> existingUserOpt = userRepository.findById(id);
-        
-        if (existingUserOpt.isEmpty()) {
-            throw new IllegalArgumentException("User not found with id: " + id);
-        }
-        
-        User existingUser = existingUserOpt.get();
+    public User updateUser(User user, Long userId) {
+        Optional<User> existingUserOpt = userRepository.findById(userId);
 
-        existingUser.setEmail(updatedUser.getEmail());
-        existingUser.setFirstName(updatedUser.getFirstName());
-        existingUser.setLastName(updatedUser.getLastName());
-        existingUser.setPhone(updatedUser.getPhone());
-        existingUser.setStreetAddress(updatedUser.getStreetAddress());
-        existingUser.setCity(updatedUser.getCity());
-        existingUser.setState(updatedUser.getState());
-        existingUser.setPostalCode(updatedUser.getPostalCode());
-        existingUser.setCountry(updatedUser.getCountry());
+        if (existingUserOpt.isPresent()) {
+            User existingUser = existingUserOpt.get();
+            user.setPassword(existingUser.getPassword());
 
-        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
-            existingUser.setPassword(encoder.encode(updatedUser.getPassword()));
+            logger.info("Updating user {} with id {}", user.getEmail(), userId);
+            return userRepository.save(user);
+        } else {
+            logger.error("User with ID {} not found during update", userId);
+            throw new RuntimeException("User not found");
         }
-        
-        return userRepository.save(existingUser);
+    }
+
+    @Override
+    public boolean existsByEmailAndNotId(String email, Long userId) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        return userOpt.isPresent() && !userOpt.get().getId().equals(userId);
     }
 }
