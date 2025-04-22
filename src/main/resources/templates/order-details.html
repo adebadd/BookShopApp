@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Order Details - BookShopApp</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <style>
+    .order-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .order-number {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    
+    .order-date {
+      color: #6c757d;
+    }
+    
+    .order-status {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      font-weight: 500;
+    }
+    
+    .status-pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-processing {
+      background-color: #d1ecf1;
+      color: #0c5460;
+    }
+    
+    .status-shipped {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .status-delivered {
+      background-color: #c3e6cb;
+      color: #155724;
+    }
+    
+    .status-cancelled {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .order-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 30px;
+    }
+    
+    .detail-section {
+      margin-bottom: 25px;
+    }
+    
+    .detail-section h3 {
+      margin-bottom: 15px;
+      font-size: 1.1em;
+      border-bottom: 1px solid #dee2e6;
+      padding-bottom: 10px;
+    }
+    
+    .shipping-info p {
+      margin: 5px 0;
+    }
+    
+    .order-items {
+      margin-top: 30px;
+    }
+    
+    .item-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .item-table th {
+      background-color: #f8f9fa;
+      text-align: left;
+      padding: 12px;
+      border-bottom: 2px solid #dee2e6;
+    }
+    
+    .item-table td {
+      padding: 12px;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .order-total {
+      text-align: right;
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .btn:hover {
+      background-color: #0069d9;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid #007bff;
+      color: #007bff;
+    }
+    
+    .btn-outline:hover {
+      background-color: #007bff;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a th:href="@{/home}">
+        <i class="bi bi-book"></i>
+        BookShopApp
+      </a>
+    </div>
+    <nav class="nav-links">
+      <a th:href="@{/account}" title="My Account"><i class="bi bi-person-circle"></i> Profile</a>
+      <a th:href="@{/cart}" title="Cart"><i class="bi bi-cart"></i> Cart</a>
+    </nav>
+  </header>
+  
+  <main class="content">
+    <div class="order-container">
+      <div class="order-header">
+        <div>
+          <h1>Order Details</h1>
+          <p class="order-number">Order #<span th:text="${orderNumber}">ORD-12345</span></p>
+          <p class="order-date">Placed on <span th:text="${#temporals.format(order.orderDate, 'dd-MM-yyyy HH:mm')}">01-04-2025</span></p>
+        </div>
+        <div>
+          <span th:class="'order-status status-' + ${#strings.toLowerCase(order.status)}" th:text="${order.status}">PENDING</span>
+        </div>
+      </div>
+      
+      <div class="order-details">
+        <div class="detail-section">
+          <h3>Shipping Information</h3>
+          <div class="shipping-info">
+            <p><strong>Address:</strong> <span th:text="${order.shippingAddress}">123 Main St</span></p>
+            <p><strong>City:</strong> <span th:text="${order.shippingCity}">Dublin</span></p>
+            <p th:if="${order.shippingState != null}"><strong>State:</strong> <span th:text="${order.shippingState}">Leinster</span></p>
+            <p><strong>Postal Code:</strong> <span th:text="${order.shippingPostalCode}">D01 AB12</span></p>
+            <p><strong>Country:</strong> <span th:text="${order.shippingCountry}">Ireland</span></p>
+          </div>
+        </div>
+        
+        <div class="detail-section">
+          <h3>Payment Method</h3>
+          <p th:text="${order.paymentMethod} == 'creditCard' ? 'Credit Card' : (${order.paymentMethod} == 'paypal' ? 'PayPal' : 'Bank Transfer')">Credit Card</p>
+        </div>
+      </div>
+      
+      <div class="order-items">
+        <h3>Items</h3>
+        <table class="item-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="item : ${orderItems}">
+              <td th:text="${item.book.title}">Book Title</td>
+              <td th:text="${item.quantity}">1</td>
+              <td>€<span th:text="${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 2, 'POINT')}">19.99</span></td>
+              <td>€<span th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 2, 'POINT')}">19.99</span></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="order-total">
+          <span>Total:</span>
+          <span>€<span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 2, 'POINT')}">19.99</span></span>
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <a th:href="@{/account}" class="btn btn-outline">Back to My Account</a>
+        <a th:href="@{/home}" class="btn">Continue Shopping</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
