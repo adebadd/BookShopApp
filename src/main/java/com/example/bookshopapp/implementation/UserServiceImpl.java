@@ -2,6 +2,7 @@ package com.example.bookshopapp.implementation;
 
 import com.example.bookshopapp.model.User;
 import com.example.bookshopapp.repository.UserRepository;
+import com.example.bookshopapp.service.AuthenticationStrategy;
 import com.example.bookshopapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,12 +18,14 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final AuthenticationStrategy authenticationStrategy;
     private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, AuthenticationStrategy authenticationStrategy, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();
+        this.authenticationStrategy = authenticationStrategy;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -55,21 +58,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> authenticate(String email, String password) {
-        if (email == null || password == null) {
-            return Optional.empty();
-        }
-
-        String trimmedEmail = email.trim();
-        Optional<User> userOptional = userRepository.findByEmail(trimmedEmail);
-
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (passwordEncoder.matches(password, user.getPassword())) {
-                return Optional.of(user);
-            }
-        }
-
-        return Optional.empty();
+        return authenticationStrategy.authenticate(email, password);
     }
 
     @Override
