@@ -15,7 +15,7 @@ public class Cart {
     public void addItem(Book book, int quantity) {
         for (CartItem item : items) {
             if (item.getBook().getId().equals(book.getId())) {
-                item.setQuantity(item.getQuantity() + quantity);
+                item.setQuantity(quantity);
                 return;
             }
         }
@@ -23,6 +23,15 @@ public class Cart {
         newItem.setBook(book);
         newItem.setQuantity(quantity);
         items.add(newItem);
+    }
+
+    public void updateItemQuantity(Long bookId, int quantity) {
+        for (CartItem item : items) {
+            if (item.getBook().getId().equals(bookId)) {
+                item.setQuantity(quantity);
+                return;
+            }
+        }
     }
 
     public void removeItem(Long bookId) {
@@ -35,5 +44,9 @@ public class Cart {
             subtotal = subtotal.add(item.getBook().getPrice().multiply(new BigDecimal(item.getQuantity())));
         }
         return subtotal;
+    }
+
+    public void clear() {
+        items.clear();
     }
 }

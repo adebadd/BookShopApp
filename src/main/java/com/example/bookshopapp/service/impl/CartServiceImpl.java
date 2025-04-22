@@ -34,7 +34,7 @@ public class CartServiceImpl implements CartService {
     public void addCartItem(Long userId, Long bookId, Integer quantity) {
         com.example.bookshopapp.model.entity.CartItem existingItem = cartItemRepository.findByUserIdAndBookId(userId, bookId);
         if (existingItem != null) {
-            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+            existingItem.setQuantity(quantity);
             cartItemRepository.save(existingItem);
         } else {
             com.example.bookshopapp.model.entity.CartItem newItem = new com.example.bookshopapp.model.entity.CartItem();

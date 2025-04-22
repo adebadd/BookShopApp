@@ -5,6 +5,8 @@ import com.example.bookshopapp.model.Cart;
 import com.example.bookshopapp.model.Order;
 import com.example.bookshopapp.model.OrderItem;
 import com.example.bookshopapp.model.User;
+import com.example.bookshopapp.model.OrderBuilder;
+import com.example.bookshopapp.model.OrderItemBuilder;
 import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.service.OrderService;
 import com.example.bookshopapp.service.UserService;
@@ -93,31 +95,35 @@ public class CheckoutController {
                 redirectAttributes.addFlashAttribute("errorMessage", "You must be logged in to complete checkout.");
                 return "redirect:/login";
             }
-            Order order = new Order();
-            order.setUserId(userId);
-            order.setOrderDate(LocalDateTime.now());
-            order.setTotalAmount(cart.getSubtotal());
-            order.setStatus("PENDING");
-            order.setShippingAddress(address);
-            order.setShippingCity(city);
-            order.setShippingState(state);
-            order.setShippingPostalCode(postcode);
-            order.setShippingCountry(country);
-            order.setPaymentMethod(paymentMethod);
+            Order order = new OrderBuilder()
+                .withUserId(userId)
+                .withTotalAmount(cart.getSubtotal())
+                .withStatus("PENDING")
+                .withShippingAddress(address)
+                .withShippingCity(city)
+                .withShippingState(state)
+                .withShippingPostalCode(postcode)
+                .withShippingCountry(country)
+                .withPaymentMethod(paymentMethod)
+                .build();
+                
             for (com.example.bookshopapp.model.CartItem cartItem : cart.getItems()) {
                 Book book = cartItem.getBook();
                 if (!bookService.updateStock(book.getId(), -cartItem.getQuantity())) {
                     redirectAttributes.addFlashAttribute("errorMessage", "Not enough stock for " + book.getTitle());
                     return "redirect:/checkout";
                 }
-                OrderItem orderItem = new OrderItem();
-                orderItem.setOrder(order);
-                orderItem.setBook(book);
-                orderItem.setQuantity(cartItem.getQuantity());
-                orderItem.setUnitPrice(book.getPrice());
-                orderItem.setTotalPrice(book.getPrice().multiply(new BigDecimal(cartItem.getQuantity())));
+                
+                OrderItem orderItem = new OrderItemBuilder()
+                    .withOrder(order)
+                    .withBook(book)
+                    .withQuantity(cartItem.getQuantity())
+                    .withUnitPrice(book.getPrice())
+                    .build();
+                    
                 order.addOrderItem(orderItem);
             }
+
             order = orderService.saveOrder(order);
             session.setAttribute("lastOrder", order);
             String orderNumber = generateOrderNumber(order.getId());

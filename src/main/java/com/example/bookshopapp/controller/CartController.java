@@ -30,6 +30,7 @@ public class CartController {
 
     @GetMapping("/cart/add/{id}")
     public String addToCart(@PathVariable("id") Long id,
+                            @RequestParam(value = "quantity", defaultValue = "1") Integer quantity,
                             HttpSession session,
                             RedirectAttributes redirectAttributes) {
         Long userId = (Long) session.getAttribute("userId");
@@ -38,22 +39,22 @@ public class CartController {
             redirectAttributes.addFlashAttribute("errorMessage", "Book not found.");
             return "redirect:/home";
         }
+        
         Book book = bookOptional.get();
-        if (userId != null) {
-            cartService.addCartItem(userId, id, 1);
-        }
         Cart cart = (Cart) session.getAttribute("cart");
+        
         if (cart == null) {
             cart = new Cart();
-            if (userId != null) {
-                cart = cartService.getUserCart(userId);
-            }
-        } else if (userId != null) {
-            cartService.addCartItem(userId, id, 1);
         }
-        cart.addItem(book, 1);
+        
+        cart.addItem(book, quantity);
         session.setAttribute("cart", cart);
-        redirectAttributes.addFlashAttribute("message", "Book added to cart.");
+        
+        if (userId != null) {
+            cartService.updateCartItemQuantity(userId, id, quantity);
+        }
+        
+        redirectAttributes.addFlashAttribute("message", book.getTitle() + " added to cart.");
         return "redirect:/home";
     }
 
@@ -98,11 +99,13 @@ public class CartController {
                              RedirectAttributes redirectAttributes) {
         Long userId = (Long) session.getAttribute("userId");
         Cart cart = new Cart();
+        
         for (Map.Entry<String, String> entry : params.entrySet()) {
             if (entry.getKey().startsWith("quantity_")) {
                 try {
                     Long bookId = Long.parseLong(entry.getKey().substring("quantity_".length()));
                     int qty = Integer.parseInt(entry.getValue());
+                    
                     if (qty > 0) {
                         Optional<Book> bookOptional = bookService.getBookById(bookId);
                         if (bookOptional.isPresent()) {
@@ -112,15 +115,20 @@ public class CartController {
                                 cartService.updateCartItemQuantity(userId, bookId, qty);
                             }
                         }
-                    } else if (userId != null) {
-                        cartService.removeCartItem(userId, bookId);
+                    } else if (qty <= 0) {
+                        cart.removeItem(bookId);
+                        
+                        if (userId != null) {
+                            cartService.removeCartItem(userId, bookId);
+                        }
                     }
                 } catch (NumberFormatException e) {
                 }
             }
         }
+        
         session.setAttribute("cart", cart);
-        redirectAttributes.addFlashAttribute("message", "Cart updated.");
+        redirectAttributes.addFlashAttribute("message", "Cart updated successfully.");
         return "redirect:/cart";
     }
 
