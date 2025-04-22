@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout - BookShopApp</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <style>
+    .checkout-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    .checkout-form {
+      background-color: #f8f9fa;
+      padding: 25px;
+      border-radius: 5px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .order-summary {
+      background-color: #f8f9fa;
+      padding: 25px;
+      border-radius: 5px;
+    }
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 2px solid #ddd;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+    .disabled-field {
+      background-color: #e9ecef;
+      cursor: not-allowed;
+    }
+    .error-message {
+      color: #dc3545;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a th:href="@{/home}">
+        <i class="bi bi-book"></i>
+        BookShopApp
+      </a>
+    </div>
+    <nav class="nav-links">
+      <a th:href="@{/account}" title="My Account"><i class="bi bi-person-circle"></i> Profile</a>
+      <a th:href="@{/cart}" title="Cart"><i class="bi bi-cart"></i> Cart</a>
+    </nav>
+  </header>
+  <main class="content">
+    <div class="checkout-container">
+      <h1>Checkout</h1>
+      
+      <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
+      
+      <div class="checkout-grid">
+        <div class="checkout-form">
+          <h2>Shipping Details</h2>
+          <form action="/checkout/process" method="post">
+            <div class="form-group">
+              <label for="firstName">First Name</label>
+              <input type="text" id="firstName" name="firstName" 
+                     th:value="${firstName}" 
+                     th:readonly="${firstName != null && !firstName.isEmpty()}" 
+                     th:class="${firstName != null && !firstName.isEmpty() ? 'disabled-field' : ''}" 
+                     required>
+            </div>
+            <div class="form-group">
+              <label for="lastName">Last Name</label>
+              <input type="text" id="lastName" name="lastName" 
+                     th:value="${lastName}" 
+                     th:readonly="${lastName != null && !lastName.isEmpty()}" 
+                     th:class="${lastName != null && !lastName.isEmpty() ? 'disabled-field' : ''}" 
+                     required>
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" 
+                     th:value="${email}" 
+                     th:readonly="${email != null && !email.isEmpty()}" 
+                     th:class="${email != null && !email.isEmpty() ? 'disabled-field' : ''}" 
+                     required>
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone</label>
+              <input type="tel" id="phone" name="phone" 
+                     th:value="${phone}" 
+                     th:readonly="${phone != null && !phone.isEmpty()}" 
+                     th:class="${phone != null && !phone.isEmpty() ? 'disabled-field' : ''}" 
+                     required>
+            </div>
+            <div class="form-group">
+              <label for="address">Address</label>
+              <input type="text" id="address" name="address" 
+                     th:value="${address}" 
+                     th:readonly="${address != null && !address.isEmpty()}" 
+                     th:class="${address != null && !address.isEmpty() ? 'disabled-field' : ''}" 
+                     required>
+            </div>
+            <div class="form-group">
+              <label for="city">City</label>
+              <input type="text" id="city" name="city" 
+                     th:value="${city}" 
+                     th:readonly="${city != null && !city.isEmpty()}" 
+                     th:class="${city != null && !city.isEmpty() ? 'disabled-field' : ''}" 
+                     required>
+            </div>
+            <div class="form-group">
+              <label for="state">State/Province</label>
+              <input type="text" id="state" name="state" 
+                     th:value="${state}" 
+                     th:readonly="${state != null && !state.isEmpty()}" 
+                     th:class="${state != null && !state.isEmpty() ? 'disabled-field' : ''}">
+            </div>
+            <div class="form-group">
+              <label for="postcode">Postal Code</label>
+              <input type="text" id="postcode" name="postcode" 
+                     th:value="${postcode}" 
+                     th:readonly="${postcode != null && !postcode.isEmpty()}" 
+                     th:class="${postcode != null && !postcode.isEmpty() ? 'disabled-field' : ''}" 
+                     required>
+            </div>
+            <div class="form-group">
+              <label for="country">Country</label>
+              <input type="text" id="country" name="country" 
+                     th:value="${country}" 
+                     th:readonly="${country != null && !country.isEmpty()}" 
+                     th:class="${country != null && !country.isEmpty() ? 'disabled-field' : ''}" 
+                     required>
+            </div>
+            <div class="form-group">
+              <label for="paymentMethod">Payment Method</label>
+              <select id="paymentMethod" name="paymentMethod" required>
+                <option value="" disabled selected>Select payment method</option>
+                <option value="creditCard" th:selected="${paymentMethod == 'creditCard'}">Credit Card</option>
+                <option value="paypal" th:selected="${paymentMethod == 'paypal'}">PayPal</option>
+                <option value="bankTransfer" th:selected="${paymentMethod == 'bankTransfer'}">Bank Transfer</option>
+              </select>
+            </div>
+            <button type="submit" class="btn">Place Order</button>
+          </form>
+        </div>
+        
+        <div class="order-summary">
+          <h2>Order Summary</h2>
+          <div th:each="item : ${cartItems}" class="summary-item">
+            <div>
+              <span th:text="${item.quantity + ' x'}">1 x</span>
+              <span th:text="${item.book.title}">Book Title</span>
+            </div>
+            <div th:text="${'€' + #numbers.formatDecimal(item.book.price.multiply(new java.math.BigDecimal(item.quantity)), 0, 'COMMA', 2, 'POINT')}">€12.99</div>
+          </div>
+          <div class="summary-total">
+            <span>Total:</span>
+            <span th:text="${'€' + #numbers.formatDecimal(subtotal, 0, 'COMMA', 2, 'POINT')}">€42.97</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

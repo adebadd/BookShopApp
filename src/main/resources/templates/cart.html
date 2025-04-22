@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Shopping Cart - BookShopApp</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a th:href="@{/home}">
+        <i class="bi bi-book"></i>
+        BookShopApp
+      </a>
+    </div>
+    <nav class="nav-links">
+      <a th:href="@{/account}" title="My Account"><i class="bi bi-person-circle"></i> Profile</a>
+      <a th:href="@{/cart}" title="Cart" class="active">
+        <i class="bi bi-cart"></i> Cart
+        <span class="cart-count" th:if="${session.cart != null and !session.cart.items.isEmpty()}" 
+              th:text="${session.cart.items.size()}">0</span>
+      </a>
+    </nav>
+  </header>
+  <main class="content">
+    <div class="top-controls">
+      <a th:href="@{/home}" class="btn-back"><i class="bi bi-arrow-left"></i> Continue Shopping</a>
+    </div>
+    <h1>Shopping Cart</h1>
+    <section class="cart-empty" th:if="${#lists.isEmpty(cartItems)}">
+      <i class="bi bi-cart" style="font-size:80px; color:#007BFF;"></i>
+      <p>Your cart is empty.</p>
+    </section>
+    <section class="cart-items" th:if="${!#lists.isEmpty(cartItems)}">
+      <form method="post" th:action="@{/cart/update}">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:35%;">Title</th>
+              <th style="width:15%;">Price</th>
+              <th style="width:15%;">Quantity</th>
+              <th style="width:15%;">Subtotal</th>
+              <th style="width:20%;">Remove</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="item : ${cartItems}">
+              <td th:text="${item.book.title}">Book Title</td>
+              <td th:text="${'€' + #numbers.formatDecimal(item.total, 1, 2)}">€12.99</td>
+              <td>
+                <input type="number" min="0" th:name="'quantity_' + ${item.book.id}" 
+                       th:value="${item.quantity}" class="qty-input">
+              </td>
+              <td th:text="${#numbers.formatDecimal(item.bookPrice * item.quantity, 1, 2)}">€0.00</td>
+              <td>
+                <a th:href="@{/cart/remove/{id}(id=${item.book.id})}" class="btn">Remove</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="totals">
+          <strong>Total: </strong>
+          <span th:text="${#numbers.formatDecimal(subtotal, 1, 2)}">€0.00</span>
+        </div>
+        <div class="cart-actions">
+          <button type="submit" class="btn">Update Cart</button>
+          <a th:href="@{/checkout}" class="btn">Proceed to Checkout</a>
+        </div>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

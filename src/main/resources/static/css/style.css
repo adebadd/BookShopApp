@@ -1,0 +1,390 @@
+body {
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+header {
+  background-color: #007BFF;
+  padding: 15px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #fff;
+}
+
+header .logo a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.5em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+header .nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+header .nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.2em;
+  transition: color 0.3s ease;
+}
+
+header .nav-links a:hover {
+  color: #cce5ff;
+}
+
+main,
+main.content {
+  max-width: 1000px;
+  margin: 30px auto;
+  padding: 20px;
+}
+
+main h1,
+main.content h1 {
+  text-align: center;
+  font-size: 2.5em;
+  margin-bottom: 20px;
+}
+
+.account-section,
+.order-history {
+  margin-bottom: 30px;
+}
+
+.account-section .account-info {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.account-section label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.account-section input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+}
+
+.update-button {
+  text-align: right;
+}
+
+.update-button button,
+.btn-back,
+.search-filters button {
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 1em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.update-button button:hover,
+.btn-back:hover,
+.search-filters button:hover {
+  background-color: #0056b3;
+}
+
+.order-history table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.order-history th,
+.order-history td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: left;
+  font-size: 0.95em;
+}
+
+.order-history th {
+  background-color: #f2f2f2;
+}
+
+.no-orders {
+  text-align: center;
+  font-style: italic;
+}
+
+.back-button {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.search-section {
+  margin-bottom: 30px;
+}
+
+.search-filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.search-filters input,
+.search-filters select {
+  padding: 10px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-width: 180px;
+}
+
+.book-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.book-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 20px;
+  width: calc(33% - 40px);
+  min-width: 300px;
+  transition: box-shadow 0.3s ease;
+}
+
+.book-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.book-card h2 {
+  font-size: 1.8em;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.book-card p {
+  margin: 6px 0;
+  color: #555;
+  font-size: 0.95em;
+}
+
+.book-card a {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 1em;
+  color: #007BFF;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.book-card a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.pagination {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.pagination a {
+  margin: 0 5px;
+  font-size: 1em;
+  text-decoration: none;
+  color: #007BFF;
+  transition: color 0.3s ease;
+}
+
+.pagination a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.update-button button,
+.btn-back,
+.search-filters button,
+.btn {
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 1em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.update-button button:hover,
+.btn-back:hover,
+.search-filters button:hover,
+.btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.top-back-btn {
+  display: block;
+  margin-bottom: 20px;
+  width: fit-content;
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+.top-back-btn:hover {
+  background-color: #0056b3;
+}
+
+.top-controls {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.btn-back {
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 1em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-back:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.cart-empty {
+  text-align: center;
+  margin: 40px 0;
+}
+
+.cart-empty p {
+  font-size: 1.3em;
+  color: #555;
+  margin-top: 15px;
+}
+
+.cart-items table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.cart-items th,
+.cart-items td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: left;
+  font-size: 0.95em;
+}
+
+.cart-items th {
+  background-color: #f2f2f2;
+}
+
+.qty-input {
+  width: 60px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.totals {
+  text-align: right;
+  margin-top: 10px;
+  font-size: 1.2em;
+}
+
+.cart-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.pagination {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.pagination button {
+  margin: 0 5px;
+  font-size: 1em;
+  border: none;
+  background-color: #007BFF;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+
+header .nav-links a.active:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.pagination .btn.active {
+  background-color: #0056b3;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.pagination .btn.active:hover {
+  background-color: #004494;
+}
+
+.cart-count {
+  display: inline-block;
+  background-color: #ff4757;
+  color: white;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  position: relative;
+  top: -10px;
+  left: -5px;
+  font-weight: bold;
+  padding: 0 4px;
+}
+
+.cart-count.animate {
+  animation: pulse 0.5s;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}

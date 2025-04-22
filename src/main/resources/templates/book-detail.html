@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Book Details - BookShopApp</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <style>
+      .book-detail-container {
+        max-width: 1000px;
+        margin: 30px auto;
+        padding: 20px;
+        background-color: #ffffff;
+        color: #333;
+      }
+      .book-header {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        margin-bottom: 30px;
+      }
+      .book-image {
+        max-width: 300px;
+      }
+      .book-info {
+        flex: 1;
+      }
+      .book-info h1 {
+        margin-top: 0;
+        font-size: 2.5em;
+        color: #333;
+      }
+      .book-info p {
+        font-size: 1.1em;
+        color: #555;
+        margin: 10px 0;
+      }
+      .review-section {
+        margin-top: 40px;
+      }
+      .review-section h2 {
+        color: #007bff;
+        margin-bottom: 20px;
+      }
+      .review {
+        border-top: 1px solid #ddd;
+        padding: 10px 0;
+      }
+      .review:first-child {
+        border-top: none;
+      }
+      .review h3 {
+        margin: 0;
+        font-size: 1.2em;
+        color: #007bff;
+      }
+      .review p {
+        margin: 5px 0;
+        color: #555;
+      }
+      .top-back-btn {
+        display: block;
+        margin-bottom: 20px;
+        width: fit-content;
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 50px;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+      }
+      .top-back-btn:hover {
+        background-color: #0056b3;
+      }
+      .book-actions {
+        margin-top: 25px;
+        display: flex;
+        gap: 15px;
+      }
+
+      .book-actions .btn {
+        padding: 12px 25px;
+        font-size: 1.1em;
+      }
+      .review-form {
+        margin-top: 40px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+      }
+      
+      .review-form h3 {
+        margin-top: 0;
+        color: #007bff;
+      }
+      
+      .form-group {
+        margin-bottom: 15px;
+      }
+      
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      
+      .form-control {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      
+      .star-rating {
+        display: inline-flex;
+        flex-direction: row-reverse;
+        gap: 5px;
+      }
+      
+      .star-rating input {
+        display: none;
+      }
+      
+      .star-rating label {
+        cursor: pointer;
+        font-size: 25px;
+        color: #ddd;
+      }
+      
+      .star-rating label:hover,
+      .star-rating label:hover ~ label,
+      .star-rating input:checked ~ label {
+        color: #ffcc00;
+      }
+      
+      .submit-review {
+        margin-top: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <a th:href="@{/home}">
+          <i class="bi bi-book"></i>
+          BookShopApp
+        </a>
+      </div>
+      <nav class="nav-links">
+        <a th:href="@{/home}" title="Home"><i class="bi bi-house-door"></i> Home</a>
+        <a th:href="@{/account}" title="My Account"><i class="bi bi-person-circle"></i> Profile</a>
+        <a th:href="@{/cart}" title="Cart">
+          <i class="bi bi-cart"></i> Cart
+          <span class="cart-count" th:if="${session.cart != null and !session.cart.items.isEmpty()}" th:text="${session.cart.items.size()}">0</span>
+        </a>
+      </nav>
+    </header>
+    <main class="book-detail-container">
+      <a th:href="@{/home}" class="top-back-btn"><i class="bi bi-arrow-left"></i> Back to Catalogue</a>
+      <div class="book-header">
+        <div class="book-image">
+          <img th:src="${book.imageUrl}" alt="Book Cover" style="width: 100%; border-radius: 10px" />
+        </div>
+        <div class="book-info">
+          <h1 th:text="${book.title}">Book Title</h1>
+          <p>
+            <strong>Author:</strong>
+            <span th:if="${!book.authors.isEmpty()}" th:text="${book.authors[0].name}">Author Name</span>
+            <span th:if="${book.authors.size() > 1}">
+              <span th:text="'and ' + (${book.authors.size()} - 1) + ' more'"></span>
+            </span>
+            <span th:if="${book.authors.isEmpty()}">Unknown</span>
+          </p>
+          <p>
+            <strong>Price:</strong> <span th:text="${book.price}">€0.00</span>
+          </p>
+          <p>
+            <strong>ISBN:</strong>
+            <span th:text="${book.isbn}">ISBN Number</span>
+          </p>
+          <p th:text="${book.description}">Book description goes here.</p>
+
+          <div class="book-actions">
+            <button type="button" class="btn" th:onclick="|location.href='@{/cart/add/{id}(id=${book.id})}'|">
+              <i class="bi bi-cart-plus"></i> Add to Cart
+            </button>
+          </div>
+          
+          <div class="review-section">
+            <h2>Reviews</h2>
+            <div th:each="review : ${reviews}" class="review">
+              <h3 th:text="${review.user != null ? review.user.firstName + ' ' + review.user.lastName : 'Anonymous User'}"></h3>
+              <p>
+                Rating: 
+                <span th:each="star : ${#numbers.sequence(1, review.rating)}">
+                  <i class="bi bi-star-fill" style="color: #ffcc00;"></i>
+                </span>
+                <span th:each="star : ${#numbers.sequence(review.rating + 1, 5)}">
+                  <i class="bi bi-star" style="color: #ddd;"></i>
+                </span>
+              </p>
+              <p th:text="${review.comment}"></p>
+            </div>
+            <div th:if="${#lists.isEmpty(reviews)}">
+              <p>No reviews yet.</p>
+            </div>
+            
+            <div class="review-form">
+              <h3>Write a Review</h3>
+              
+              <div th:if="${session.userId == null}">
+                <p>Please <a th:href="@{/login}">sign in</a> to leave a review.</p>
+              </div>
+              
+              <form th:if="${session.userId != null}" method="post" th:action="@{/book/{id}/review(id=${book.id})}">
+                <div class="form-group">
+                  <label>Rating:</label>
+                  <div class="star-rating">
+                    <input type="radio" id="star5" name="rating" value="5" required>
+                    <label for="star5"><i class="bi bi-star-fill"></i></label>
+                    
+                    <input type="radio" id="star4" name="rating" value="4">
+                    <label for="star4"><i class="bi bi-star-fill"></i></label>
+                    
+                    <input type="radio" id="star3" name="rating" value="3">
+                    <label for="star3"><i class="bi bi-star-fill"></i></label>
+                    
+                    <input type="radio" id="star2" name="rating" value="2">
+                    <label for="star2"><i class="bi bi-star-fill"></i></label>
+                    
+                    <input type="radio" id="star1" name="rating" value="1">
+                    <label for="star1"><i class="bi bi-star-fill"></i></label>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label for="comment">Review:</label>
+                  <textarea id="comment" name="comment" class="form-control" rows="4" required></textarea>
+                </div>
+                
+                <div class="submit-review">
+                  <button type="submit" class="btn">Submit Review</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

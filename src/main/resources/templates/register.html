@@ -1,19 +1,119 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Register</title>
+    <meta charset="UTF-8">
+    <title>Register - BookShopApp</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body {
+            background-color: #add8e6;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            background: #fff;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            flex: 1;
+            text-align: left;
+        }
+        label {
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 30px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 20px 0;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .login-link {
+            font-size: 0.9em;
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .login-link:hover {
+            text-decoration: underline;
+        }
+        .error-message {
+            color: #d9534f;
+            font-size: 0.9em;
+        }
+    </style>
 </head>
-<body style="font-family: Arial, sans-serif; background-color: #f0fff0;">
-    <h1 style="color: green;">Register</h1>
-    <form th:action="@{/register}" method="post" style="max-width: 300px;">
-        <label for="name" style="color: green;">Name:</label>
-        <input type="text" id="name" name="name" required style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid green; border-radius: 4px;">
-        <br>
-        <label for="password" style="color: green;">Password:</label>
-        <input type="password" id="password" name="password" required style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid green; border-radius: 4px;">
-        <br>
-        <button type="submit" style="background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;">Register</button>
-    </form>
-    <p style="color: green;" th:text="${errorMessage}"></p>
+<body>
+    <div class="container">
+        <h1>Register</h1>
+        <form th:action="@{/register}" method="post">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name:</label>
+                    <input type="text" id="firstName" name="firstName">
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name:</label>
+                    <input type="text" id="lastName" name="lastName">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" name="phone">
+            </div>
+            
+            <button type="submit">Register</button>
+        </form>
+        <a th:href="@{/login}" class="login-link">Already have an account? Log in here</a>
+        <p class="error-message" th:text="${errorMessage}"></p>
+    </div>
 </body>
 </html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Order Confirmation - BookShopApp</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <style>
+    .confirmation-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .success-message {
+      text-align: center;
+      margin: 30px 0;
+    }
+    
+    .success-icon {
+      color: #28a745;
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+    
+    .order-details {
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+    
+    .detail-section {
+      margin-bottom: 25px;
+    }
+    
+    .detail-section h3 {
+      border-bottom: 1px solid #dee2e6;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .order-items {
+      margin: 20px 0;
+    }
+    
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .order-total {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+    
+    .shipping-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .shipping-info p {
+      margin: 5px 0;
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+    
+    .order-number {
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a th:href="@{/home}">
+        <i class="bi bi-book"></i>
+        BookShopApp
+      </a>
+    </div>
+    <nav class="nav-links">
+      <a th:href="@{/account}" title="My Account"><i class="bi bi-person-circle"></i> Profile</a>
+      <a th:href="@{/cart}" title="Cart"><i class="bi bi-cart"></i> Cart</a>
+    </nav>
+  </header>
+  <main class="content">
+    <div class="confirmation-container">
+      <div class="success-message">
+        <i class="bi bi-check-circle-fill success-icon"></i>
+        <h1>Order Placed Successfully!</h1>
+        <p class="order-number">Order #<span th:text="${orderNumber}">ORD-2025-04-15-001</span></p>
+        <p>A confirmation email has been sent to your email address.</p>
+      </div>
+      
+      <div class="order-details">
+        <div class="detail-section">
+          <h3>Order Summary</h3>
+          <div class="order-items">
+            <div class="order-item" th:each="item : ${orderItems}">
+              <div>
+                <span th:text="${item.quantity} + ' × '">1 × </span>
+                <span th:text="${item.book.title}">Book Title</span>
+              </div>
+              <div>€<span th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 2, 'POINT')}">0.00</span></div>
+            </div>
+          </div>
+          
+          <div class="order-total">
+            <span>Total:</span>
+            <span th:if="${order != null}">€<span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 2, 'POINT')}">0.00</span></span>
+          </div>
+        </div>
+        
+        <div class="detail-section">
+          <h3>Shipping Information</h3>
+          <div class="shipping-info">
+            <div>
+              <p><strong>Name:</strong> <span th:text="${firstName + ' ' + lastName}">John Doe</span></p>
+              <p><strong>Email:</strong> <span th:text="${email}">john@example.com</span></p>
+              <p><strong>Phone:</strong> <span th:text="${phone}">+353 86 123 4567</span></p>
+            </div>
+            <div>
+              <p><strong>Address:</strong> <span th:text="${address}">123 Main St</span></p>
+              <p><strong>City:</strong> <span th:text="${city}">Dublin</span></p>
+              <p><strong>Postcode:</strong> <span th:text="${postcode}">D01 AB12</span></p>
+              <p><strong>Country:</strong> <span th:text="${country}">Ireland</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="detail-section">
+          <h3>Payment Method</h3>
+          <p th:text="${paymentMethod} == 'creditCard' ? 'Credit Card' : (${paymentMethod} == 'paypal' ? 'PayPal' : 'Bank Transfer')">Credit Card</p>
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <a th:href="@{/home}" class="btn">Continue Shopping</a>
+        <a th:href="@{/account}" class="btn">View Order History</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

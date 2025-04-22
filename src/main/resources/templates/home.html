@@ -1,65 +1,98 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Home</title>
+  <meta charset="UTF-8">
+  <title>Catalogue - BookShopApp</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
-<body style="font-family: Arial, sans-serif; background-color: #f0fff0;">
-    <h1 style="color: green;">Greenhouse Gas Emissions</h1>
-    <p style="color: green;" th:text="'Hello, ' + ${name} + '!'"></p>
+<body>
+  <header>
+    <div class="logo">
+      <a th:href="@{/home}">
+        <i class="bi bi-book"></i>
+        BookShopApp
+      </a>
+    </div>
+    <nav class="nav-links">
+      <a th:href="@{/account}" title="My Account"><i class="bi bi-person-circle"></i> Profile</a>
+      <a th:href="@{/cart}" title="Cart">
+        <i class="bi bi-cart"></i> Cart
+        <span class="cart-count" th:if="${session.cart != null and !session.cart.items.isEmpty()}" 
+              th:text="${session.cart.items.size()}">0</span>
+      </a>
+    </nav>
+  </header>
+  <main class="content">
+    <h1>Our Book Catalogue</h1>
+    <section class="search-section">
+      <form method="get" th:action="@{/home}">
+        <div class="search-filters">
+          <input type="text" name="title" th:value="${title}" placeholder="Search by Title">
+          <input type="text" name="author" th:value="${author}" placeholder="Search by Author">
+          <input type="text" name="category" th:value="${category}" placeholder="Search by Category">
+          <input type="text" name="publisher" th:value="${publisher}" placeholder="Search by Publisher">
+          <select name="sort">
+            <option value="">Sort By</option>
+            <option value="title" th:selected="${sort == 'title'}">Title</option>
+            <option value="author" th:selected="${sort == 'author'}">Author</option>
+            <option value="priceAsc" th:selected="${sort == 'priceAsc'}">Price (Low to High)</option>
+            <option value="priceDesc" th:selected="${sort == 'priceDesc'}">Price (High to Low)</option>
+          </select>
+          <button type="submit" class="btn">Search</button>
+        </div>
+      </form>
+    </section>
+    
+    <div class="message-container" th:if="${message}">
+      <p class="success-message" th:text="${message}"></p>
+    </div>
 
-    <div style="float: right; margin-right: 60px;">
-        <img src="https://www.un.org/sites/un2.un.org/files/2021/08/feeling-the-heat.jpg" 
-          style="max-width: 400px; border: 1px solid green;">
-    </div>
-    <form th:action="@{/parse}" method="get" style="margin-bottom: 20px;">
-        <button type="submit" style="background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;">Parse Data</button>
-    </form>
-    <div style="margin-bottom: 20px;">
-        <a href="/api/emissions" style="text-decoration: none;">
-            <button type="button" style="background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;">View Emissions JSON</button>
-        </a>
-        <a href="/api/users" style="text-decoration: none;">
-            <button type="button" style="background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;">View Users JSON</button>
-        </a>
-    </div>
-    
-    <h2 style="color: green;">Emission Data</h2>
-    
-    <form th:action="@{/home}" method="get" style="margin-bottom: 20px;">
-        <label for="categoryFilter" style="color: green;">Filter Emissions by category:</label>
-        <select id="categoryFilter" name="category" style="padding: 5px;">
-            <option value="" th:text="'All'" th:selected="${category == null || category == ''}"></option>
-            <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}" th:selected="${cat == category}"></option>
-        </select>
-        <button type="submit" style="background-color: green; color: white; border: none; padding: 5px 10px; cursor: pointer;">Filter</button>
-    </form>
-    
-    <table border="1" style="border-collapse: collapse; width: 100%;">
-        <thead style="background-color: #e0ffe0;">
-            <tr>
-                <th style="padding: 10px; text-align: left; color: green;">Category</th>
-                <th style="padding: 10px; text-align: left; color: green;">Scenario</th>
-                <th style="padding: 10px; text-align: left; color: green;">Year</th>
-                <th style="padding: 10px; text-align: left; color: green;">Gas Units</th>
-                <th style="padding: 10px; text-align: left; color: green;">Predicted Value</th>
-                <th style="padding: 10px; text-align: left; color: green;">Actual Value</th>
-                <th style="padding: 10px; text-align: left; color: green;">Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="emission : ${emissions}">
-                <td style="padding: 10px; color: green;" th:text="${emission.category}"></td>
-                <td style="padding: 10px; color: green;" th:text="${emission.scenario}"></td>
-                <td style="padding: 10px; color: green;" th:text="${emission.year}"></td>
-                <td style="padding: 10px; color: green;" th:text="${emission.gasUnits}"></td>
-                <td style="padding: 10px; color: green;" th:text="${emission.predictedValue}"></td>
-                <td style="padding: 10px; color: green;" th:text="${emission.actualValue}"></td>
-                <td style="padding: 10px; color: green;" th:text="${emission.description}"></td>
-            </tr>
-        </tbody>
-    </table>
-        <form th:action="@{/logout}" method="get" style="margin-top: 20px;">
-        <button type="submit" style="background-color: green; color: white; border: none; padding: 10px 20px; cursor: pointer;">Logout</button>
-    </form>
+    <section class="book-list">
+      <div class="book-card" th:each="book : ${books}">
+        <h2 th:text="${book.title}">Book Title</h2>
+        <div th:if="${!book.authors.isEmpty()}">
+          <p><strong>Author:</strong> 
+            <span th:text="${book.authors.size() > 0 ? book.authors.iterator().next().name : 'Unknown'}">Author Name</span>
+            <span th:if="${book.authors.size() > 1}">(+<span th:text="${book.authors.size() - 1}"></span> more)</span>
+          </p>
+        </div>
+        <div th:if="${!book.categories.isEmpty()}">
+          <p><strong>Category:</strong> 
+            <span th:text="${book.categories.size() > 0 ? book.categories.iterator().next().name : 'Uncategorized'}">Category</span>
+            <span th:if="${book.categories.size() > 1}">(+<span th:text="${book.categories.size() - 1}"></span> more)</span>
+          </p>
+        </div>
+        <p th:if="${book.publisher != null}"><strong>Publisher:</strong> <span th:text="${book.publisher.name}">Publisher</span></p>
+        <p><strong>Price:</strong> €<span th:text="${#numbers.formatDecimal(book.price, 0, 'COMMA', 2, 'POINT')}">0.00</span></p>
+        <p><strong>ISBN:</strong> <span th:text="${book.isbn}">000000000</span></p>
+        <a th:href="@{/book/{id}(id=${book.id})}">View Details</a>
+        <button type="button" class="btn" th:onclick="|location.href='@{/cart/add/{id}(id=${book.id})}'|">
+          <i class="bi bi-cart-plus"></i> Add to Cart
+        </button>
+      </div>
+
+      <div class="no-books-message" th:if="${books.isEmpty()}">
+        <p>No books were found. Try adjusting your search criteria.</p>
+      </div>
+    </section>
+
+    <section class="pagination" th:if="${totalPages > 0}">
+      <button type="button" class="btn" 
+              th:onclick="${currentPage > 1} ? |location.href='@{/home(page=${currentPage - 1}, title=${title}, author=${author}, category=${category}, publisher=${publisher}, sort=${sort})}'| : ''" 
+              th:disabled="${currentPage <= 1}">« Prev</button>
+      <div th:each="i : ${#numbers.sequence(1, totalPages)}">
+        <button type="button" class="btn" 
+                th:onclick="|location.href='@{/home(page=${i}, title=${title}, author=${author}, category=${category}, publisher=${publisher}, sort=${sort})}'|" 
+                th:classappend="${currentPage == i} ? 'active' : ''">
+          <span th:text="${i}">1</span>
+        </button>
+      </div>
+
+      <button type="button" class="btn" 
+              th:onclick="${currentPage < totalPages} ? |location.href='@{/home(page=${currentPage + 1}, title=${title}, author=${author}, category=${category}, publisher=${publisher}, sort=${sort})}'| : ''" 
+              th:disabled="${currentPage >= totalPages}">Next »</button>
+    </section>
+  </main>
 </body>
 </html>
