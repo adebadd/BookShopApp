@@ -14,4 +14,5 @@ public interface UserService {
     boolean register(User user, String password);
     User updateUser(User user, Long userId);
     boolean existsByEmailAndNotId(String email, Long userId);
+    long countUsers();
 }

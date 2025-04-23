@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Book Management - BookShopApp</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <style>
+    .admin-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    .admin-sidebar {
+      width: 250px;
+      background-color: #007BFF;
+      color: #fff;
+      padding: 20px 0;
+      position: fixed;
+      height: 100%;
+      overflow-y: auto;
+    }
+    
+    .admin-sidebar-header {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .admin-sidebar-header h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+    
+    .admin-sidebar-menu {
+      padding: 20px 0;
+    }
+    
+    .admin-sidebar-menu h3 {
+      padding: 0 20px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .admin-menu-item {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .admin-menu-item:hover, .admin-menu-item.active {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .admin-menu-item i {
+      font-size: 1.2rem;
+      min-width: 24px;
+    }
+    
+    .admin-main-content {
+      flex: 1;
+      margin-left: 250px;
+      padding: 20px;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .book-management-actions {
+      margin-bottom: 20px;
+    }
+    
+    .search-filters {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    
+    .search-filters form {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    
+    .search-filters .form-group {
+      margin-bottom: 0;
+    }
+    
+    .search-filters label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      font-size: 0.9em;
+    }
+    
+    .search-filters input, .search-filters select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    
+    .search-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .books-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    
+    .books-table th, .books-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .books-table th {
+      background-color: #f8f9fa;
+      color: #333;
+      font-weight: 600;
+    }
+    
+    .books-table tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .book-actions {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .book-actions a, .book-actions button {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 5px;
+      color: #6c757d;
+      transition: color 0.3s ease;
+    }
+    
+    .book-actions a:hover, .book-actions button:hover {
+      color: #007bff;
+    }
+    
+    .book-actions form {
+      margin: 0;
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .pagination a {
+      padding: 8px 12px;
+      margin: 0 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      color: #007bff;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    
+    .pagination a:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .pagination .active {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    
+    .pagination .disabled {
+      color: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .sort-link {
+      color: #333;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+    
+    .sort-link:hover {
+      color: #007bff;
+    }
+    
+    .sort-link i {
+      margin-left: 5px;
+      font-size: 0.8em;
+    }
+    
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+    
+    .alert-success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    
+    .alert-danger {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+    
+    .stock-indicator {
+      padding: 5px 8px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      font-weight: 500;
+    }
+    
+    .stock-low {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    
+    .stock-medium {
+      background-color: #d1ecf1;
+      color: #0c5460;
+    }
+    
+    .stock-high {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .stock-out {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 5px;
+      width: 80%;
+      max-width: 500px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+    
+    .close-modal {
+      position: absolute;
+      right: 20px;
+      top: 10px;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .close-modal:hover {
+      color: #007bff;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="admin-sidebar">
+      <div class="admin-sidebar-header">
+        <h2><i class="bi bi-book"></i> BookShopApp</h2>
+      </div>
+      
+      <div class="admin-sidebar-menu">
+        <h3>Main</h3>
+        <a th:href="@{/admin/dashboard}" class="admin-menu-item">
+          <i class="bi bi-speedometer"></i> Dashboard
+        </a>
+        <a th:href="@{/admin/books}" class="admin-menu-item active">
+          <i class="bi bi-book"></i> Book Management
+        </a>
+        <a th:href="@{/admin/orders}" class="admin-menu-item">
+          <i class="bi bi-cart"></i> Order Management
+        </a>
+        <a th:href="@{/admin/users}" class="admin-menu-item">
+          <i class="bi bi-people"></i> User Management
+        </a>
+      </div>
+      
+      <div class="admin-sidebar-menu">
+        <h3>Account</h3>
+        <a th:href="@{/admin/logout}" class="admin-menu-item">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+      </div>
+    </div>
+    
+    <div class="admin-main-content">
+      <div class="admin-header">
+        <h1>Book Management</h1>
+        <div class="book-management-actions">
+          <a th:href="@{/admin/books/create}" class="btn">
+            <i class="bi bi-plus-circle"></i> Add New Book
+          </a>
+        </div>
+      </div>
+      
+      <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+      <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+      <div class="search-section">
+        <form class="search-filters" th:action="@{/admin/books}" method="get">
+          <input type="text" name="title" th:value="${title}" placeholder="Search by title">
+          <input type="text" name="author" th:value="${author}" placeholder="Search by author">
+          <select name="category">
+            <option value="">All Categories</option>
+            <option th:each="cat : ${categories}" 
+                    th:value="${cat.name}" 
+                    th:text="${cat.name}"
+                    th:selected="${category != null and category == cat.name}"></option>
+          </select>
+          <select name="publisher">
+            <option value="">All Publishers</option>
+            <option th:each="pub : ${publishers}" 
+                    th:value="${pub.name}" 
+                    th:text="${pub.name}"
+                    th:selected="${publisher != null and publisher == pub.name}"></option>
+          </select>
+          <input type="hidden" name="page" th:value="${currentPage}">
+          <input type="hidden" name="size" th:value="${size}">
+          <input type="hidden" name="sortBy" th:value="${sortBy}">
+          <input type="hidden" name="sortDir" th:value="${sortDir}">
+          
+          <button type="submit">
+            <i class="bi bi-search"></i> Search
+          </button>
+          <button type="button" onclick="window.location.href='/admin/books'">
+            <i class="bi bi-x-circle"></i> Reset
+          </button>
+        </form>
+      </div>
+
+      <table class="books-table">
+        <thead>
+          <tr>
+            <th>
+              <a class="sort-link" th:href="@{/admin/books(page=${currentPage}, size=${size}, sortBy='title', sortDir=${sortBy == 'title' ? reverseSortDir : 'asc'}, title=${title}, author=${author}, category=${category}, publisher=${publisher})}">
+                Title
+                <i th:if="${sortBy == 'title'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+              </a>
+            </th>
+            <th>
+              <a class="sort-link" th:href="@{/admin/books(page=${currentPage}, size=${size}, sortBy='authors[0].name', sortDir=${sortBy == 'authors[0].name' ? reverseSortDir : 'asc'}, title=${title}, author=${author}, category=${category}, publisher=${publisher})}">
+                Author
+                <i th:if="${sortBy == 'authors[0].name'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+              </a>
+            </th>
+            <th>ISBN</th>
+            <th>
+              <a class="sort-link" th:href="@{/admin/books(page=${currentPage}, size=${size}, sortBy='price', sortDir=${sortBy == 'price' ? reverseSortDir : 'asc'}, title=${title}, author=${author}, category=${category}, publisher=${publisher})}">
+                Price
+                <i th:if="${sortBy == 'price'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+              </a>
+            </th>
+            <th>
+              <a class="sort-link" th:href="@{/admin/books(page=${currentPage}, size=${size}, sortBy='stockQuantity', sortDir=${sortBy == 'stockQuantity' ? reverseSortDir : 'asc'}, title=${title}, author=${author}, category=${category}, publisher=${publisher})}">
+                Stock
+                <i th:if="${sortBy == 'stockQuantity'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+              </a>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="book : ${books}">
+            <td th:text="${book.title}">Book Title</td>
+            <td>
+              <span th:if="${book.authors != null && !book.authors.isEmpty()}" th:text="${book.authors[0].name}">Author Name</span>
+              <span th:if="${book.authors == null || book.authors.isEmpty()}">Unknown</span>
+            </td>
+            <td th:text="${book.isbn}">ISBN</td>
+            <td th:text="${'€' + #numbers.formatDecimal(book.price, 0, 'COMMA', 2, 'POINT')}">€19.99</td>
+            <td>
+              <span th:if="${book.stockQuantity > 10}" class="stock-indicator stock-high" th:text="${book.stockQuantity}">25</span>
+              <span th:if="${book.stockQuantity > 5 && book.stockQuantity <= 10}" class="stock-indicator stock-medium" th:text="${book.stockQuantity}">8</span>
+              <span th:if="${book.stockQuantity > 0 && book.stockQuantity <= 5}" class="stock-indicator stock-low" th:text="${book.stockQuantity}">3</span>
+              <span th:if="${book.stockQuantity <= 0}" class="stock-indicator stock-out">Out of Stock</span>
+            </td>
+            <td>
+              <div class="book-actions">
+                <a th:href="@{/admin/books/edit/{id}(id=${book.id})}" title="Edit">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button type="button" onclick="openStockModal(this)" th:data-book-id="${book.id}" th:data-book-title="${book.title}" th:data-book-stock="${book.stockQuantity}" title="Update Stock">
+                  <i class="bi bi-box"></i>
+                </button>
+                <form th:action="@{/admin/books/delete/{id}(id=${book.id})}" method="post" onsubmit="return confirm('Are you sure you want to delete this book?');">
+                  <button type="submit" title="Delete">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(books)}">
+            <td colspan="6" style="text-align: center;">No books found</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="pagination" th:if="${totalPages > 1}">
+        <a th:if="${currentPage > 0}" th:href="@{/admin/books(page=${currentPage - 1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir}, title=${title}, author=${author}, category=${category}, publisher=${publisher})}" class="btn">&laquo; Previous</a>
+        <span th:each="i: ${#numbers.sequence(0, totalPages - 1)}">
+          <a th:if="${currentPage != i}" th:href="@{/admin/books(page=${i}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir}, title=${title}, author=${author}, category=${category}, publisher=${publisher})}" class="btn" th:text="${i + 1}">1</a>
+          <a th:if="${currentPage == i}" th:href="@{/admin/books(page=${i}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir}, title=${title}, author=${author}, category=${category}, publisher=${publisher})}" class="btn active" th:text="${i + 1}">1</a>
+        </span>
+        <a th:if="${currentPage < totalPages - 1}" th:href="@{/admin/books(page=${currentPage + 1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir}, title=${title}, author=${author}, category=${category}, publisher=${publisher})}" class="btn">Next &raquo;</a>
+      </div>
+    </div>
+  </div>
+  
+  <div id="stockModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeStockModal()">&times;</span>
+      <h2>Update Stock</h2>
+      <p id="stockModalTitle">Book Title</p>
+      <form id="stockUpdateForm" method="post" action="">
+        <div class="form-group">
+          <label for="quantity">Quantity</label>
+          <input type="number" id="quantity" name="quantity" value="0" min="0">
+        </div>
+        <button type="submit" class="btn">Update Stock</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openStockModal(button) {
+      const modal = document.getElementById('stockModal');
+      const form = document.getElementById('stockUpdateForm');
+      const titleElem = document.getElementById('stockModalTitle');
+      const quantityInput = document.getElementById('quantity');
+      
+      const bookId = button.getAttribute('data-book-id');
+      const bookTitle = button.getAttribute('data-book-title');
+      const bookStock = button.getAttribute('data-book-stock');
+      
+      titleElem.textContent = bookTitle;
+      quantityInput.value = bookStock;
+      form.action = '/admin/books/updateStock/' + bookId;
+      
+      modal.style.display = "block";
+    }
+    
+    function closeStockModal() {
+      document.getElementById('stockModal').style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById('stockModal');
+      if (event.target == modal) {
+        closeStockModal();
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,35 +1,60 @@
 package com.example.bookshopapp.service.impl;
 
+import com.example.bookshopapp.model.Author;
 import com.example.bookshopapp.model.Book;
+import com.example.bookshopapp.model.Category;
+import com.example.bookshopapp.model.Publisher;
+import com.example.bookshopapp.repository.AuthorRepository;
 import com.example.bookshopapp.repository.BookRepository;
+import com.example.bookshopapp.repository.CategoryRepository;
+import com.example.bookshopapp.repository.PublisherRepository;
 import com.example.bookshopapp.service.BookService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class BookServiceImpl implements BookService {
 
-    private final BookRepository bookRepository;
+    @Autowired
+    private BookRepository bookRepository;
 
     @Autowired
-    public BookServiceImpl(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
-    }
+    private AuthorRepository authorRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private PublisherRepository publisherRepository;
 
     @Override
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
     }
-    
+
+    @Override
+    public Page<Book> getAllBooks(Pageable pageable) {
+        return bookRepository.findAll(pageable);
+    }
+
     @Override
     public Page<Book> getAllBooksWithPagination(Pageable pageable) {
         return bookRepository.findAll(pageable);
@@ -42,7 +67,119 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book saveBook(Book book) {
+        book.setUpdatedAt(LocalDateTime.now());
+        if (book.getCreatedAt() == null) {
+            book.setCreatedAt(LocalDateTime.now());
+        }
         return bookRepository.save(book);
+    }
+
+    @Override
+    @Transactional
+    public void saveBookWithRelationships(Book book, Long[] authorIds, Long[] categoryIds, Long publisherId,
+            MultipartFile imageFile) {
+        if (publisherId != null) {
+            Publisher publisher = publisherRepository.findById(publisherId)
+                    .orElseThrow(() -> new RuntimeException("Publisher not found"));
+            book.setPublisher(publisher);
+        }
+
+        Set<Author> authors = new HashSet<>();
+        if (authorIds != null) {
+            for (Long authorId : authorIds) {
+                Author author = authorRepository.findById(authorId)
+                        .orElseThrow(() -> new RuntimeException("Author not found: " + authorId));
+                authors.add(author);
+            }
+        }
+        book.setAuthors(authors);
+
+        Set<Category> categories = new HashSet<>();
+        if (categoryIds != null) {
+            for (Long categoryId : categoryIds) {
+                Category category = categoryRepository.findById(categoryId)
+                        .orElseThrow(() -> new RuntimeException("Category not found: " + categoryId));
+                categories.add(category);
+            }
+        }
+        book.setCategories(categories);
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                String uploadsDir = "src/main/resources/static/images/";
+                String uniqueFileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+                Path path = Paths.get(uploadsDir + uniqueFileName);
+                Files.createDirectories(path.getParent());
+                Files.write(path, imageFile.getBytes());
+                book.setImageUrl("/images/" + uniqueFileName);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save image file", e);
+            }
+        }
+
+        book.setUpdatedAt(LocalDateTime.now());
+        if (book.getCreatedAt() == null) {
+            book.setCreatedAt(LocalDateTime.now());
+        }
+
+        bookRepository.save(book);
+    }
+
+    @Override
+    @Transactional
+    public void updateBookWithRelationships(Book book, Long[] authorIds, Long[] categoryIds, Long publisherId,
+            MultipartFile imageFile) {
+        Book existingBook = bookRepository.findById(book.getId())
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        existingBook.setTitle(book.getTitle());
+        existingBook.setIsbn(book.getIsbn());
+        existingBook.setDescription(book.getDescription());
+        existingBook.setPrice(book.getPrice());
+        existingBook.setStockQuantity(book.getStockQuantity());
+        existingBook.setPublicationYear(book.getPublicationYear());
+        existingBook.setUpdatedAt(LocalDateTime.now());
+
+        if (publisherId != null) {
+            Publisher publisher = publisherRepository.findById(publisherId)
+                    .orElseThrow(() -> new RuntimeException("Publisher not found"));
+            existingBook.setPublisher(publisher);
+        }
+
+        Set<Author> authors = new HashSet<>();
+        if (authorIds != null) {
+            for (Long authorId : authorIds) {
+                Author author = authorRepository.findById(authorId)
+                        .orElseThrow(() -> new RuntimeException("Author not found: " + authorId));
+                authors.add(author);
+            }
+            existingBook.setAuthors(authors);
+        }
+
+        Set<Category> categories = new HashSet<>();
+        if (categoryIds != null) {
+            for (Long categoryId : categoryIds) {
+                Category category = categoryRepository.findById(categoryId)
+                        .orElseThrow(() -> new RuntimeException("Category not found: " + categoryId));
+                categories.add(category);
+            }
+            existingBook.setCategories(categories);
+        }
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                String uploadsDir = "src/main/resources/static/images/";
+                String uniqueFileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+                Path path = Paths.get(uploadsDir + uniqueFileName);
+                Files.createDirectories(path.getParent());
+                Files.write(path, imageFile.getBytes());
+                existingBook.setImageUrl("/images/" + uniqueFileName);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save image file", e);
+            }
+        }
+
+        bookRepository.save(existingBook);
     }
 
     @Override
@@ -51,104 +188,90 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<Book> searchBooks(String title, String author, String category, String publisher) {
-        List<Book> results = new ArrayList<>();
-        
-        if (title != null && !title.isEmpty()) {
-            results.addAll(findByTitle(title));
-        } else if (author != null && !author.isEmpty()) {
-            results.addAll(findByAuthor(author));
-        } else if (category != null && !category.isEmpty()) {
-            results.addAll(findByCategory(category));
-        } else if (publisher != null && !publisher.isEmpty()) {
-            results.addAll(findByPublisher(publisher));
-        } else {
-            results = getAllBooks();
-        }
-
-        return results.stream().distinct().collect(Collectors.toList());
-    }
-    
-    @Override
-    public Page<Book> searchBooks(String title, String author, String category, String publisher, Pageable pageable) {
-        Specification<Book> spec = Specification.where(null);
-        
-        if (title != null && !title.isEmpty()) {
-            spec = spec.and((root, query, builder) -> 
-                builder.like(builder.lower(root.get("title")), "%" + title.toLowerCase() + "%"));
-        }
-        
-        if (author != null && !author.isEmpty()) {
-            spec = spec.and((root, query, criteriaBuilder) -> {
-                query.distinct(true);
-                return criteriaBuilder.like(
-                    criteriaBuilder.lower(root.join("authors").get("name")), 
-                    "%" + author.toLowerCase() + "%"
-                );
-            });
-        }
-        
-        if (category != null && !category.isEmpty()) {
-            spec = spec.and((root, query, criteriaBuilder) -> {
-                query.distinct(true);
-                return criteriaBuilder.like(
-                    criteriaBuilder.lower(root.join("categories").get("name")), 
-                    "%" + category.toLowerCase() + "%"
-                );
-            });
-        }
-        
-        if (publisher != null && !publisher.isEmpty()) {
-            spec = spec.and((root, query, criteriaBuilder) -> 
-                criteriaBuilder.like(
-                    criteriaBuilder.lower(root.join("publisher").get("name")), 
-                    "%" + publisher.toLowerCase() + "%"
-                )
-            );
-        }
-        
-        return bookRepository.findAll(spec, pageable);
-    }
-
-    @Override
-    public List<Book> findByTitle(String title) {
-        return bookRepository.findByTitleContainingIgnoreCase(title);
-    }
-
-    @Override
-    public List<Book> findByAuthor(String author) {
-        return bookRepository.findByAuthorNameContainingIgnoreCase(author);
-    }
-
-    @Override
-    public List<Book> findByCategory(String category) {
-        return bookRepository.findByCategoryNameContainingIgnoreCase(category);
-    }
-
-    @Override
-    public List<Book> findByPublisher(String publisher) {
-        return bookRepository.findByPublisherNameContainingIgnoreCase(publisher);
-    }
-
-    @Override
-    @Transactional
-    public boolean updateStock(Long bookId, int quantity) {
-        Optional<Book> bookOptional = bookRepository.findById(bookId);
+    public boolean updateStock(Long id, int quantity) {
+        Optional<Book> bookOptional = bookRepository.findById(id);
         if (bookOptional.isPresent()) {
             Book book = bookOptional.get();
-            int newStock = book.getStockQuantity() + quantity;
-            if (newStock >= 0) {
-                book.setStockQuantity(newStock);
-                bookRepository.save(book);
-                return true;
+            int newQuantity = book.getStockQuantity() + quantity;
+            if (newQuantity < 0) {
+                return false;
             }
+            book.setStockQuantity(newQuantity);
+            book.setUpdatedAt(LocalDateTime.now());
+            bookRepository.save(book);
+            return true;
         }
         return false;
     }
 
     @Override
-    public boolean isInStock(Long bookId) {
-        Optional<Book> bookOptional = bookRepository.findById(bookId);
-        return bookOptional.map(book -> book.getStockQuantity() > 0).orElse(false);
+    public Page<Book> searchBooks(String title, String author, String category, String publisher, Pageable pageable) {
+        List<Book> allBooks = bookRepository.findAll();
+        List<Book> filteredBooks = new ArrayList<>();
+
+        for (Book book : allBooks) {
+            boolean matches = true;
+            if (title != null && !title.isEmpty()) {
+                if (book.getTitle() == null || !book.getTitle().toLowerCase().contains(title.toLowerCase())) {
+                    matches = false;
+                }
+            }
+
+            if (matches && author != null && !author.isEmpty()) {
+                boolean authorMatch = false;
+                if (book.getAuthors() != null) {
+                    for (Author bookAuthor : book.getAuthors()) {
+                        if (bookAuthor.getName() != null &&
+                                bookAuthor.getName().toLowerCase().contains(author.toLowerCase())) {
+                            authorMatch = true;
+                            break;
+                        }
+                    }
+                }
+                if (!authorMatch)
+                    matches = false;
+            }
+            if (matches && category != null && !category.isEmpty()) {
+                boolean categoryMatch = false;
+                if (book.getCategories() != null) {
+                    for (Category bookCategory : book.getCategories()) {
+                        if (bookCategory.getName() != null &&
+                                bookCategory.getName().toLowerCase().contains(category.toLowerCase())) {
+                            categoryMatch = true;
+                            break;
+                        }
+                    }
+                }
+                if (!categoryMatch)
+                    matches = false;
+            }
+            if (matches && publisher != null && !publisher.isEmpty()) {
+                if (book.getPublisher() == null || book.getPublisher().getName() == null ||
+                        !book.getPublisher().getName().toLowerCase().contains(publisher.toLowerCase())) {
+                    matches = false;
+                }
+            }
+
+            if (matches) {
+                filteredBooks.add(book);
+            }
+        }
+        // test to mayb manually handle pagination??
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), filteredBooks.size());
+
+        List<Book> pageContent = start >= filteredBooks.size() ? new ArrayList<>() : filteredBooks.subList(start, end);
+
+        return new PageImpl<>(pageContent, pageable, filteredBooks.size());
+    }
+
+    @Override
+    public long countBooks() {
+        return bookRepository.count();
+    }
+
+    @Override
+    public long countLowStockBooks(int threshold) {
+        return bookRepository.countByStockQuantityLessThan(threshold);
     }
 }

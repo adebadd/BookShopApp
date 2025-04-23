@@ -4,6 +4,8 @@ import com.example.bookshopapp.model.Order;
 import com.example.bookshopapp.repository.OrderRepository;
 import com.example.bookshopapp.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,5 +60,17 @@ public class OrderServiceImpl implements OrderService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public long countOrders() {
+        return orderRepository.count();
+    }
+
+    @Override
+    public List<Order> getRecentOrders(int limit) {
+        return orderRepository.findAll(
+            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "orderDate")))
+            .getContent();
     }
 }

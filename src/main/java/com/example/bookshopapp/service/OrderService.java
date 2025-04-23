@@ -11,4 +11,7 @@ public interface OrderService {
     Order saveOrder(Order order);
     void deleteOrder(Long id);
     boolean updateOrderStatus(Long id, String status);
+
+    long countOrders();
+    List<Order> getRecentOrders(int limit);
 }

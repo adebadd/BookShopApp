@@ -92,4 +92,9 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOpt = userRepository.findByEmail(email);
         return userOpt.isPresent() && !userOpt.get().getId().equals(userId);
     }
+
+    @Override
+    public long countUsers() {
+        return userRepository.count();
+    }
 }
