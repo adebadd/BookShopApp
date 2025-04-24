@@ -13,7 +13,9 @@ import com.example.bookshopapp.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -268,10 +270,5 @@ public class BookServiceImpl implements BookService {
     @Override
     public long countBooks() {
         return bookRepository.count();
-    }
-
-    @Override
-    public long countLowStockBooks(int threshold) {
-        return bookRepository.countByStockQuantityLessThan(threshold);
     }
 }

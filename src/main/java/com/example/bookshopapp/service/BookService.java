@@ -20,5 +20,4 @@ public interface BookService {
     boolean updateStock(Long id, int quantity);
     Page<Book> searchBooks(String title, String author, String category, String publisher, Pageable pageable);
     long countBooks();
-    long countLowStockBooks(int threshold);
 }

@@ -12,13 +12,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.time.Month;
+import java.time.format.TextStyle;
+import java.util.*;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -82,9 +82,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getRecentOrders(int limit) {
-        return orderRepository.findAll(
-            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "orderDate")))
-            .getContent();
+        PageRequest pageRequest = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "orderDate"));
+        return orderRepository.findAll(pageRequest).getContent();
     }
 
     @Override
@@ -143,5 +142,42 @@ public class OrderServiceImpl implements OrderService {
                 new ArrayList<>() : filteredOrders.subList(start, end);
                 
         return new PageImpl<>(pageContent, pageable, filteredOrders.size());
+    }
+
+    @Override
+    public BigDecimal calculateTotalRevenue() {
+        List<Order> completedOrders = orderRepository.findByStatus("COMPLETED");
+        return completedOrders.stream()
+                .map(Order::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+    
+    @Override
+    public Map<String, Object> getMonthlyOrderStats() {
+        Map<String, Object> monthlyStats = new LinkedHashMap<>();
+        
+        int currentYear = LocalDateTime.now().getYear();
+        
+        for (Month month : Month.values()) {
+            String monthName = month.getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+            
+            LocalDateTime startOfMonth = LocalDateTime.of(currentYear, month, 1, 0, 0);
+            LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusSeconds(1);
+            
+            List<Order> ordersInMonth = orderRepository.findByOrderDateBetween(startOfMonth, endOfMonth);
+            
+            long orderCount = ordersInMonth.size();
+            BigDecimal monthlyRevenue = ordersInMonth.stream()
+                    .map(Order::getTotalAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+            Map<String, Object> monthData = new HashMap<>();
+            monthData.put("count", orderCount);
+            monthData.put("revenue", monthlyRevenue);
+            
+            monthlyStats.put(monthName, monthData);
+        }
+        
+        return monthlyStats;
     }
 }

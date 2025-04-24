@@ -1,5 +1,6 @@
 package com.example.bookshopapp.controller.admin;
 
+import com.example.bookshopapp.facade.AdminDashboardFacade;
 import com.example.bookshopapp.model.User;
 import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.service.OrderService;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.servlet.http.HttpSession;
-import java.util.Collections;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
@@ -21,12 +22,19 @@ public class AdminController {
     private final BookService bookService;
     private final OrderService orderService;
     private final UserService userService;
+    private final AdminDashboardFacade dashboardFacade;
 
     @Autowired
-    public AdminController(BookService bookService, OrderService orderService, UserService userService) {
+    public AdminController(
+        BookService bookService, 
+        OrderService orderService, 
+        UserService userService, 
+        AdminDashboardFacade dashboardFacade
+    ) {
         this.bookService = bookService;
         this.orderService = orderService;
         this.userService = userService;
+        this.dashboardFacade = dashboardFacade;
     }
 
     @GetMapping("")
@@ -47,15 +55,15 @@ public class AdminController {
         }
         
         try {
-            model.addAttribute("totalBooks", bookService.countBooks());
-            model.addAttribute("totalUsers", userService.countUsers());
-            model.addAttribute("totalOrders", orderService.countOrders());
-            model.addAttribute("recentOrders", orderService.getRecentOrders(5));
+            Map<String, Object> dashboardData = dashboardFacade.getDashboardSummary();
+            model.addAllAttributes(dashboardData);
+            model.addAttribute("adminName", currentUser.getFirstName());
         } catch (Exception e) {
             model.addAttribute("totalBooks", 0);
             model.addAttribute("totalUsers", 0);
             model.addAttribute("totalOrders", 0);
-            model.addAttribute("recentOrders", Collections.emptyList());
+            model.addAttribute("recentOrders", java.util.Collections.emptyList());
+            model.addAttribute("error", "Failed to load dashboard data");
         }
         
         return "admin/admin-dashboard";

@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface BookRepository extends JpaRepository<Book, Long> {
     long countByStockQuantityLessThan(int threshold);
     Page<Book> findAllByTitleContainingIgnoreCase(String title, Pageable pageable);
+    Page<Book> findByStockQuantityLessThanOrderByStockQuantityAsc(int threshold, Pageable pageable);
 }

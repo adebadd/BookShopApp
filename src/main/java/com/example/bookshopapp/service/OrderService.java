@@ -4,8 +4,10 @@ import com.example.bookshopapp.model.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface OrderService {
@@ -29,4 +31,8 @@ public interface OrderService {
     long countOrders();
     
     List<Order> getRecentOrders(int limit);
+
+    BigDecimal calculateTotalRevenue();
+
+    Map<String, Object> getMonthlyOrderStats();
 }
