@@ -15,7 +15,7 @@
       </a>
     </div>
     <nav class="nav-links">
-      <a th:href="@{/account}" title="My Account"><i class="bi bi-person-circle"></i> Profile</a>
+      <a th:href="@{/account}" title="My Account"><i class="bi bi-person-circle"></i> Account</a>
       <a th:href="@{/cart}" title="Cart" class="active">
         <i class="bi bi-cart"></i> Cart
         <span class="cart-count" th:if="${session.cart != null and !session.cart.items.isEmpty()}" 
