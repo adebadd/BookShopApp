@@ -31,6 +31,7 @@
       align-items: center;
       gap: 10px;
       color: #fff;
+      font-weight: normal;
     }
     
     .admin-sidebar-menu {
@@ -189,7 +190,7 @@
       <div class="admin-sidebar-menu">
         <h3>Main</h3>
         <a th:href="@{/admin/dashboard}" class="admin-menu-item active">
-          <i class="bi bi-speedometer"></i> Dashboard
+          <i class="bi bi-speedometer2"></i> Dashboard
         </a>
         <a th:href="@{/admin/books}" class="admin-menu-item">
           <i class="bi bi-book"></i> Book Management
@@ -213,10 +214,6 @@
     <div class="admin-main-content">
       <div class="admin-dashboard-header">
         <h1>Dashboard</h1>
-        <div class="user-info">
-          <i class="bi bi-person-circle"></i>
-          <span th:text="${session.userName}">Admin User</span>
-        </div>
       </div>
       
       <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>

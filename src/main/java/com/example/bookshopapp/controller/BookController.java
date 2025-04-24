@@ -42,7 +42,7 @@ public class BookController {
             List<Review> reviews = reviewService.getReviewsByBookId(id);
             model.addAttribute("reviews", reviews);
             
-            return "book-detail";
+            return "book-details";
         } else {
             return "redirect:/home";
         }

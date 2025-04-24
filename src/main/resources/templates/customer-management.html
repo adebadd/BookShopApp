@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Customer Management - BookShopApp</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <style>
+    .admin-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .admin-sidebar {
+      width: 250px;
+      background-color: #007bff;
+      color: #fff;
+      padding: 20px 0;
+      position: fixed;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .admin-sidebar-header {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .admin-sidebar-header h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+      font-weight: normal;
+    }
+
+    .admin-sidebar-menu {
+      padding: 20px 0;
+    }
+
+    .admin-sidebar-menu h3 {
+      padding: 0 20px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .admin-menu-item {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .admin-menu-item:hover,
+    .admin-menu-item.active {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .admin-menu-item i {
+      font-size: 1.2rem;
+      min-width: 24px;
+    }
+
+    .admin-main-content {
+      flex: 1;
+      margin-left: 250px;
+      padding: 20px;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .search-filters {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+
+    .search-filters form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .search-filters .form-group {
+      flex: 1;
+      min-width: 150px;
+      margin-bottom: 0;
+    }
+
+    .search-filters label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      font-size: 0.9em;
+    }
+
+    .search-filters input,
+    .search-filters select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    .search-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    th {
+      background-color: #f8f9fa;
+      color: #333;
+      font-weight: 600;
+    }
+    
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .order-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .order-actions a,
+    .order-actions button {
+      padding: 5px;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #6c757d;
+      transition: color 0.3s ease;
+    }
+
+    .order-actions a:hover,
+    .order-actions button:hover {
+      color: #007bff;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .pagination a {
+      padding: 8px 12px;
+      margin: 0 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      color: #007bff;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .pagination a:hover {
+      background-color: #f8f9fa;
+    }
+
+    .pagination .active {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+
+    .pagination .disabled {
+      color: #6c757d;
+      cursor: not-allowed;
+    }
+
+    .sort-link {
+      color: #333;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .sort-link:hover {
+      color: #007bff;
+    }
+
+    .sort-link i {
+      margin-left: 5px;
+      font-size: 0.8em;
+    }
+
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+
+    .alert-success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+
+    .no-customers {
+      text-align: center;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="admin-sidebar">
+      <div class="admin-sidebar-header">
+        <h2><i class="bi bi-book"></i> BookShopApp</h2>
+      </div>
+
+      <div class="admin-sidebar-menu">
+        <h3>Main</h3>
+        <a th:href="@{/admin/dashboard}" class="admin-menu-item">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a th:href="@{/admin/books}" class="admin-menu-item">
+          <i class="bi bi-book"></i> Book Management
+        </a>
+        <a th:href="@{/admin/orders}" class="admin-menu-item">
+          <i class="bi bi-cart"></i> Order Management
+        </a>
+        <a th:href="@{/admin/users}" class="admin-menu-item active">
+          <i class="bi bi-people"></i> User Management
+        </a>
+      </div>
+
+      <div class="admin-sidebar-menu">
+        <h3>Account</h3>
+        <a th:href="@{/logout}" class="admin-menu-item">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+      </div>
+    </div>
+
+    <div class="admin-main-content">
+      <div class="admin-header">
+        <h1>Customer Management</h1>
+      </div>
+      
+      <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+      <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+      
+      <div class="search-filters">
+        <form th:action="@{/admin/users}" method="get">
+          <div class="form-group">
+            <label for="userId">Customer ID</label>
+            <input type="text" id="userId" name="userId" th:value="${userId}" placeholder="Search by customer ID">
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email" th:value="${email}" placeholder="Search by email">
+          </div>
+          <div class="form-group">
+            <label for="role">Role</label>
+            <select id="role" name="role">
+              <option value="">All Roles</option>
+              <option value="CUSTOMER" th:selected="${role == 'CUSTOMER'}">Customer</option>
+              <option value="ADMIN" th:selected="${role == 'ADMIN'}">Admin</option>
+            </select>
+          </div>
+          <div class="search-actions">
+            <button type="submit" class="btn">
+              <i class="bi bi-search"></i> Search
+            </button>
+            <a th:href="@{/admin/users}" class="btn">Reset</a>
+          </div>
+          
+          <input type="hidden" name="page" th:value="${currentPage}">
+          <input type="hidden" name="size" th:value="${size}">
+          <input type="hidden" name="sortBy" th:value="${sort}">
+          <input type="hidden" name="sortDir" th:value="${direction}">
+        </form>
+      </div>
+      
+      <table th:if="${!users.isEmpty()}">
+        <thead>
+          <tr>
+            <th>
+              <a class="sort-link" th:href="@{/admin/users(page=${currentPage}, size=${size}, sortBy='id', sortDir=${sort == 'id' ? (direction == 'asc' ? 'desc' : 'asc') : 'asc'}, userId=${userId}, email=${email}, role=${role})}">
+                Customer ID
+                <i th:if="${sort == 'id'}" th:class="${direction == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+              </a>
+            </th>
+            <th>
+              <a class="sort-link" th:href="@{/admin/users(page=${currentPage}, size=${size}, sortBy='firstName', sortDir=${sort == 'firstName' ? (direction == 'asc' ? 'desc' : 'asc') : 'asc'}, userId=${userId}, email=${email}, role=${role})}">
+                Name
+                <i th:if="${sort == 'firstName'}" th:class="${direction == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+              </a>
+            </th>
+            <th>
+              <a class="sort-link" th:href="@{/admin/users(page=${currentPage}, size=${size}, sortBy='email', sortDir=${sort == 'email' ? (direction == 'asc' ? 'desc' : 'asc') : 'asc'}, userId=${userId}, email=${email}, role=${role})}">
+                Email
+                <i th:if="${sort == 'email'}" th:class="${direction == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+              </a>
+            </th>
+            <th>Phone</th>
+            <th>
+              <a class="sort-link" th:href="@{/admin/users(page=${currentPage}, size=${size}, sortBy='role', sortDir=${sort == 'role' ? (direction == 'asc' ? 'desc' : 'asc') : 'asc'}, userId=${userId}, email=${email}, role=${role})}">
+                Role
+                <i th:if="${sort == 'role'}" th:class="${direction == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+              </a>
+            </th>
+            <th>Status</th>
+            <th>
+              <a class="sort-link" th:href="@{/admin/users(page=${currentPage}, size=${size}, sortBy='createdAt', sortDir=${sort == 'createdAt' ? (direction == 'asc' ? 'desc' : 'asc') : 'asc'}, userId=${userId}, email=${email}, role=${role})}">
+                Registered
+                <i th:if="${sort == 'createdAt'}" th:class="${direction == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+              </a>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="user : ${users}">
+            <td th:text="${'#' + user.id}"></td>
+            <td th:text="${user.firstName + ' ' + user.lastName}"></td>
+            <td th:text="${user.email}"></td>
+            <td th:text="${user.phone != null ? user.phone : 'N/A'}"></td>
+            <td th:text="${user.role}"></td>
+            <td th:text="${user.active ? 'Active' : 'Inactive'}"></td>
+            <td th:text="${#temporals.format(user.createdAt, 'dd-MM-yyyy')}"></td>
+            <td>
+              <div class="order-actions">
+                <a th:href="@{/admin/customers/{id}(id=${user.id})}" title="View Details">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <form method="post" th:action="@{/admin/customers/{id}/toggle-status(id=${user.id})}" style="display: inline;">
+                  <button type="submit" title="${user.active ? 'Deactivate' : 'Activate'}">
+                    <i class="bi" th:class="${user.active ? 'bi-toggle-on' : 'bi-toggle-off'}"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="no-customers" th:if="${users.isEmpty()}">
+        <p>No customers found</p>
+      </div>
+      
+      <div class="pagination" th:if="${totalPages > 1}">
+        <a th:if="${currentPage > 1}" 
+           th:href="@{/admin/users(page=${currentPage - 1}, size=${size}, sortBy=${sort}, sortDir=${direction}, userId=${userId}, email=${email}, role=${role})}" 
+           class="btn">&laquo; Previous</a>
+
+        <span th:each="i: ${#numbers.sequence(1, totalPages)}">
+          <a th:if="${currentPage != i}" 
+             th:href="@{/admin/users(page=${i}, size=${size}, sortBy=${sort}, sortDir=${direction}, userId=${userId}, email=${email}, role=${role})}" 
+             class="btn" th:text="${i}">1</a>
+          
+          <a th:if="${currentPage == i}" 
+             th:href="@{/admin/users(page=${i}, size=${size}, sortBy=${sort}, sortDir=${direction}, userId=${userId}, email=${email}, role=${role})}" 
+             class="btn active" th:text="${i}">1</a>
+        </span>
+
+        <a th:if="${currentPage < totalPages}" 
+           th:href="@{/admin/users(page=${currentPage + 1}, size=${size}, sortBy=${sort}, sortDir=${direction}, userId=${userId}, email=${email}, role=${role})}" 
+           class="btn">Next &raquo;</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

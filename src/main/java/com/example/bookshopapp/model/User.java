@@ -48,6 +48,9 @@ public class User {
     @Column(name = "preferred_payment_method")
     private String preferredPaymentMethod;
 
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean active = true;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -170,6 +173,14 @@ public class User {
 
     public void setPreferredPaymentMethod(String preferredPaymentMethod) {
         this.preferredPaymentMethod = preferredPaymentMethod;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public LocalDateTime getCreatedAt() {

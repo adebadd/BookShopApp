@@ -5,6 +5,8 @@ import com.example.bookshopapp.repository.UserRepository;
 import com.example.bookshopapp.service.AuthenticationStrategy;
 import com.example.bookshopapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -31,6 +33,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    @Override
+    public Page<User> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 
     @Override
@@ -72,25 +79,43 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(User user, Long userId) {
-        Optional<User> existingUserOpt = userRepository.findById(userId);
+    public User updateUser(User updatedUser, Long id) {
+        Optional<User> existingUserOpt = userRepository.findById(id);
 
-        if (existingUserOpt.isPresent()) {
-            User existingUser = existingUserOpt.get();
-            user.setPassword(existingUser.getPassword());
-
-            logger.info("Updating user {} with id {}", user.getEmail(), userId);
-            return userRepository.save(user);
-        } else {
-            logger.error("User with ID {} not found during update", userId);
-            throw new RuntimeException("User not found");
+        if (existingUserOpt.isEmpty()) {
+            throw new IllegalArgumentException("User not found with id: " + id);
         }
+
+        User existingUser = existingUserOpt.get();
+
+        existingUser.setEmail(updatedUser.getEmail());
+        existingUser.setFirstName(updatedUser.getFirstName());
+        existingUser.setLastName(updatedUser.getLastName());
+        existingUser.setPhone(updatedUser.getPhone());
+        existingUser.setStreetAddress(updatedUser.getStreetAddress());
+        existingUser.setCity(updatedUser.getCity());
+        existingUser.setState(updatedUser.getState());
+        existingUser.setPostalCode(updatedUser.getPostalCode());
+        existingUser.setCountry(updatedUser.getCountry());
+
+        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        }
+
+        if (updatedUser.getRole() != null) {
+            existingUser.setRole(updatedUser.getRole());
+        }
+
+        if (updatedUser.isActive() != existingUser.isActive()) {
+            existingUser.setActive(updatedUser.isActive());
+        }
+
+        return userRepository.save(existingUser);
     }
 
     @Override
     public boolean existsByEmailAndNotId(String email, Long userId) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        return userOpt.isPresent() && !userOpt.get().getId().equals(userId);
+        return userRepository.existsByEmailAndIdNot(email, userId);
     }
 
     @Override
