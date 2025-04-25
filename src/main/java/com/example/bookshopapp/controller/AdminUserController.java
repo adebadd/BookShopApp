@@ -26,7 +26,7 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin")
-public class AdminUserController {
+public class AdminUserController extends AbstractAdminController {
 
     @Autowired
     private UserService userService;
@@ -47,74 +47,66 @@ public class AdminUserController {
                              Model model,
                              HttpSession session) {
         
-        if (session.getAttribute("userRole") == null || 
-            !session.getAttribute("userRole").toString().equals("ADMIN")) {
-            return "redirect:/login";
-        }
-        
-        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc") ? 
-            Sort.Direction.DESC : Sort.Direction.ASC;
-        
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(sortDirection, sort));
-        Page<User> usersPage = userService.getAllUsers(pageable);
-        
-        model.addAttribute("users", usersPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", usersPage.getTotalPages());
-        model.addAttribute("totalItems", usersPage.getTotalElements());
-        model.addAttribute("sort", sort);
-        model.addAttribute("direction", direction);
-        model.addAttribute("size", size);
-        
-        return "customer-management";
+        return executeAdminOperation(session, () -> {
+            Sort.Direction sortDirection = direction.equalsIgnoreCase("desc") ? 
+                Sort.Direction.DESC : Sort.Direction.ASC;
+            
+            Pageable pageable = PageRequest.of(page - 1, size, Sort.by(sortDirection, sort));
+            Page<User> usersPage = userService.getAllUsers(pageable);
+            
+            model.addAttribute("users", usersPage.getContent());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", usersPage.getTotalPages());
+            model.addAttribute("totalItems", usersPage.getTotalElements());
+            model.addAttribute("sort", sort);
+            model.addAttribute("direction", direction);
+            model.addAttribute("size", size);
+            
+            return "customer-management";
+        });
     }
     
     @GetMapping("/customers/{id}")
     public String viewCustomerDetails(@PathVariable("id") Long userId,
                                      Model model,
                                      HttpSession session) {
-                                     
-        if (session.getAttribute("userRole") == null || 
-            !session.getAttribute("userRole").toString().equals("ADMIN")) {
-            return "redirect:/login";
-        }
         
-        Optional<User> userOpt = userService.getUserById(userId);
-        if (!userOpt.isPresent()) {
-            return "redirect:/admin/customers";
-        }
-        
-        User user = userOpt.get();
-        List<Order> userOrders = orderService.getOrdersByUserId(userId);
-        
-        model.addAttribute("user", user);
-        model.addAttribute("orders", userOrders);
-        
-        return "customer-details";
+        return executeAdminOperation(session, () -> {
+            Optional<User> userOpt = userService.getUserById(userId);
+            if (!userOpt.isPresent()) {
+                return "redirect:/admin/customers";
+            }
+            
+            User user = userOpt.get();
+            List<Order> userOrders = orderService.getOrdersByUserId(userId);
+            
+            model.addAttribute("user", user);
+            model.addAttribute("orders", userOrders);
+            
+            return "customer-details";
+        });
     }
     
     @PostMapping("/customers/{id}/toggle-status")
     public String toggleUserStatus(@PathVariable("id") Long userId,
                                   RedirectAttributes redirectAttributes,
                                   HttpSession session) {
-                                  
-        if (session.getAttribute("userRole") == null || 
-            !session.getAttribute("userRole").toString().equals("ADMIN")) {
-            return "redirect:/login";
-        }
         
-        Optional<User> userOpt = userService.getUserById(userId);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            boolean active = user.isActive();
-            user.setActive(!active);
-            userService.updateUser(user, userId);
+        return executeAdminOperation(session, () -> {
+            Optional<User> userOpt = userService.getUserById(userId);
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                boolean active = user.isActive();
+                user.setActive(!active);
+                userService.updateUser(user, userId);
+                
+                String status = user.isActive() ? "activated" : "deactivated";
+                redirectAttributes.addFlashAttribute("message", 
+                    "User " + user.getEmail() + " has been " + status);
+            }
             
-            String status = user.isActive() ? "activated" : "deactivated";
-            redirectAttributes.addFlashAttribute("message", 
-                "User " + user.getEmail() + " has been " + status);
-        }
-        
-        return "redirect:/admin/customers";
+            return "redirect:/admin/customers";
+        });
     }
+    
 }
